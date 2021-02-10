@@ -1,0 +1,50 @@
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: phactwecrjeffreyj.azurecr.io
+        username: ${{ secrets.acr_phactwecrjeffreyj_username }}
+        password: ${{ secrets.acr_phactwecrjeffreyj_password }}
+    
+    - name: Build and push image to ACR
+      id: build-image
+      run: |
+        docker build "$GITHUB_WORKSPACE/src" -f  "src/Dockerfile" -t phactwecrjeffreyj.azurecr.io/hgweiaksaks002:${{ github.sha }} --label dockerfile-path=src/Dockerfile
+        docker push phactwecrjeffreyj.azurecr.io/hgweiaksaks002:${{ github.sha }}
+    
+    - uses: azure/k8s-set-context@v1
+      with:
+         kubeconfig: ${{ secrets.aks_hgweiaksaks002_kubeConfig }}
+      id: login
+    
+    - name: Create namespace
+      run: |
+        namespacePresent=`kubectl get namespace | grep hg-we-i-aks-aks00281a6 | wc -l`
+        if [ $namespacePresent -eq 0 ]
+        then
+            echo `kubectl create namespace hg-we-i-aks-aks00281a6`
+        fi
+
+    - uses: azure/k8s-create-secret@v1
+      with:
+        namespace: hg-we-i-aks-aks00281a6
+        container-registry-url: phactwecrjeffreyj.azurecr.io
+        container-registry-username: ${{ secrets.acr_phactwecrjeffreyj_username }}
+        container-registry-password: ${{ secrets.acr_phactwecrjeffreyj_password }}
+        secret-name: hgweiaksaks0dockerauth
+       
+    - uses: azure/k8s-deploy@v1.2
+      with:
+        namespace: hg-we-i-aks-aks00281a6
+        manifests: |
+          manifests/deployment.yml
+          manifests/service.yml
+        images: |
+          phactwecrjeffreyj.azurecr.io/hgweiaksaks002:${{ github.sha }}
+        imagepullsecrets: |
+          hgweiaksaks0dockerauth
