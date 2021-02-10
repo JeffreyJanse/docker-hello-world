@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: "hgweiaksaks002-074a"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: "hgweiaksaks002-074a"
+  template:
+    metadata:
+      labels:
+        app: "hgweiaksaks002-074a"
+    spec:
+      containers:
+        - name: "hgweiaksaks002-074a"
+          image: "phactwecrjeffreyj.azurecr.io/hgweiaksaks002"
+          ports:
+          - containerPort: 80
