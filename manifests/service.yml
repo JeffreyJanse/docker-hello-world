@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: "hgweiaksaks002-074a"
+    labels:
+        app: "hgweiaksaks002-074a"
+spec:
+    type: LoadBalancer
+    ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+    selector:
+        app: "hgweiaksaks002-074a"
